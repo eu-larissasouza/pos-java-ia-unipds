@@ -77,3 +77,40 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **Gotcha / Trade-off arquitetural:**
   * O `HashMap` utiliza uma estrutura de espalhamento (*hashing*).
   * Embora o `Map` seja imbatível para cenários com muitas buscas diretas por chave, **nem sempre ele faz sentido**. Se o seu cenário exige percorrer sequencialmente ou se o volume de dados é pequeno e não justifica o overhead de cálculo de hash, uma `List` simples ainda pode atender perfeitamente. A decisão técnica deve ponderar o volume de dados e o tipo de operação predominante (escrita vs. leitura/busca).
+
+
+
+## 4. APIs Essenciais da Plataforma Java
+
+* **O que resolve:** Aproveitar o ecossistema nativo da linguagem para lidar com nulos de forma segura, manipulação moderna de datas, introspecção de código (Reflection), metadados (Annotations), processamento de texto e criptografia sem depender de bibliotecas externas excessivas.
+
+### 1. Optional (Java 8)
+* **O que resolve:** Evitar o clássico e indesejado `NullPointerException` (NPE) de forma declarativa.
+* **A sacada (O que muda na prática):** Funciona como um invólucro (*wrapper*) que indica a presença ou ausência de um valor. Permite encadear regras de negócio e tratamentos na mesma linha, eliminando a poluição de múltiplos blocos `if (objeto != null)`.
+
+### 2. Date and Time API (Java 8)
+* **O que resolve:** Substituição definitiva do legado `java.util.Date`.
+* **A sacada:** O uso de `LocalDate`, `LocalTime` e classes associadas traz **segurança tipada** e suporte nativo e robusto para manipulação de datas, horas e fusos horários.
+* 🔗 *Referência:* [Documentação Oficial DateTimeFormatter](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)[cite: 1]
+
+### 3. Reflection API (Java 1.1)
+* **O que resolve:** Inspecionar dinamicamente classes, métodos, atributos e tipos em tempo de execução.
+* **A sacada:** Conhecida carinhosamente como a API para "hackear classes", é a base utilizada exaustivamente por frameworks corporativos (como Spring e Hibernate) para mapeamento, injeção de dependências e serialização. Permite extrair metadados, invocar métodos e acessar atributos diretamente.
+* 🔗 *Referência:* [Guia de Java Reflection da Oracle](https://www.oracle.com/technical-resources/articles/java/javareflection.html)[cite: 1]
+
+### 4. Annotation Processing (Criação de Anotações Customizadas)
+* **O que resolve:** Transformar metadados em código executável ou em regras ativas, indo além de simples comentários visuais.
+* **Conceitos-chave essenciais:**
+  * **`@Target`:** Define onde a anotação pode ser aplicada (classes, métodos, campos, etc.).
+  * **`@Retention` (Política de Retenção):** Define até quando a anotação estará disponível:
+    * `SOURCE`: Descartada após a compilação.
+    * `CLASS`: Armazenada no bytecode, mas ignorada pela JVM em execução.
+    * `RUNTIME`: Disponível em tempo de execução para ser lida via *Reflection*.
+
+### 5. RegEx (Expressões Regulares)
+* **O que resolve:** Poder de processamento e extração avançada de padrões em strings.
+* **Exemplo de Aplicação Prática:** Em um cenário de *Web Crawler* (programa automatizado que navega pela internet para mapear e indexar conteúdos de páginas web), o uso de RegEx permite varrer o código bruto coletado e extrair cirurgicamente apenas as tags ou conteúdos desejados de forma filtrada.
+
+### 6. Security (Criptografia com `Cipher`)
+* **O que resolve:** Proteção de dados sensíveis diretamente com recursos nativos do Java.
+* **A sacada:** A biblioteca `Cipher` possibilita implementar rotinas de criptografia e descriptografia de campos ou dados confidenciais com alta confiabilidade.
