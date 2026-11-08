@@ -159,3 +159,25 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 
 * **O poder do `FileChannel` com Buffer:** O ganho absurdo de performance do NIO se dá porque trabalhamos com canais diretos e blocos de memória definidos por um buffer (ex: alocar `8192` bytes). Quanto melhor dimensionado o buffer, mais blocos lemos de forma otimizada com poucas iterações de sistema.
 
+
+
+## 6. Tratamento de Erros e Exceções
+
+* **O que resolve:** Controlar desvios de fluxo causados por comportamentos anormais, garantindo a resiliência da aplicação, o fechamento seguro de recursos e a criação de regras de negócio customizadas.
+
+### A. Erros (`Error`) vs. Exceções (`Exception`)
+* **`Error`:** Problemas críticos da Máquina Virtual (JVM) ou do ambiente (ex: `OutOfMemoryError`, corrupção de hardware). São anormais e geralmente **fatais**, impossibilitando recuperação pela aplicação.
+* **`Exception`:** Comportamentos anormais que **podem ser tratados e recuperados** pela lógica do sistema. Dividem-se em:
+  * **Checked (Verificadas):** Obrigam o tratamento ou a declaração explícita na assinatura do método (`throws`). Indicam cenários recuperáveis externos (ex: arquivo não encontrado).
+  * **Unchecked (Não verificadas / `RuntimeException`):** Não exigem tratamento forçado em tempo de compilação. Geralmente refletem falhas de programação ou mau uso pelo usuário (ex: `NullPointerException`, `ArithmeticException`).
+
+### B. Boas Práticas e Recursos Modernos de Tratamento
+
+* **Ordem dos `catch`:** Sempre trate as exceções **da mais específica para a mais genérica** (evitando que uma exceção genérica como `Exception` capture tudo antes de chegar nas específicas).
+* **Multi-catch:** Permite capturar múltiplas exceções em um único bloco de tratamento utilizando o operador pipe (`|`), reduzindo a verbosidade.
+* **`finally` vs. `try-with-resources` (Java 7+):**
+  * O bloco `finally` garante a execução de rotinas de limpeza (como fechar conexões ou arquivos), independentemente do fluxo.
+  * O **`try-with-resources`** dispensa a chamada manual do `.close()`. Qualquer classe que implemente `AutoCloseable` (como `Scanner`, sockets e arquivos) é fechada automaticamente pela JVM de forma elegante e segura.
+* **Lançamento e Customização (`throw` e `throws`):**
+  * `throw`: Utilizado para instanciar e disparar uma exceção de forma ativa (ideal para criar exceções de negócio customizadas, que podem ser extendidas de `RuntimeException` para maior flexibilidade ou de `Exception` para fluxos validados).
+  * `throws`: Declaração na assinatura do método informando quais exceções verificadas ele pode propagar.
