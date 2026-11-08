@@ -181,3 +181,19 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **Lançamento e Customização (`throw` e `throws`):**
   * `throw`: Utilizado para instanciar e disparar uma exceção de forma ativa (ideal para criar exceções de negócio customizadas, que podem ser extendidas de `RuntimeException` para maior flexibilidade ou de `Exception` para fluxos validados).
   * `throws`: Declaração na assinatura do método informando quais exceções verificadas ele pode propagar.
+
+
+
+## 7. Streams API (Java 8)
+
+* **O que resolve:** Manipular coleções de dados de forma declarativa, fluida, concisa e com pouca verbosidade, permitindo encadear operações de filtragem, mapeamento, ordenação e reduções em uma única instrução.
+
+### A. Benefícios e Conceitos-Chave
+
+* **Abordagem Declarativa:** Em vez de focar no *como* fazer (loops imperativos como `for` e `if` aninhados), você descreve *o que* quer fazer com os dados.
+* **Encadeamento de Operações:** Permite combinar filtros (`filter`), transformações (`map`), ordenações (`sorted`) e agregações de forma limpa.
+* **Method References (`::`):** Introduzido no Java 8, o operador de dois pontos duplos serve como uma forma sintática mais curta e limpa de escrever expressões Lambda para chamar métodos que já existem.
+
+### B. O Detalhe Crítico: `.toList()` vs. `.collect(Collectors.toList())`
+* **`.toList()` (Java 16+):** Retorna uma lista **imutável** (tamanho fixo, não permite adição ou remoção de elementos após a criação, embora os atributos dos objetos internos possam ser alterados).
+* **`.collect(Collectors.toList())`:** Retorna uma lista **mutável**, permitindo que você adicione ou remova elementos posteriormente se o seu fluxo de negócio exigir.
