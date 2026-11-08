@@ -114,3 +114,48 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 ### 6. Security (Criptografia com `Cipher`)
 * **O que resolve:** Proteção de dados sensíveis diretamente com recursos nativos do Java.
 * **A sacada:** A biblioteca `Cipher` possibilita implementar rotinas de criptografia e descriptografia de campos ou dados confidenciais com alta confiabilidade.
+
+
+
+## 5. Manipulação de Arquivos e Entrada/Saída (I/O, NIO e NIO.2)
+
+* **O que resolve:** Escolher a API de I/O correta com base no volume de dados, garantindo performance de leitura, segurança na manipulação de caminhos e controle de concorrência.
+
+### As Três Gerações de I/O em Java
+
+#### 1. Java I/O (Desde o Java 1.0)
+* **Abordagem:** Baseada em *streams* (fluxos) orientados a byte (`InputStream`/`OutputStream`) ou caractere (`Reader`/`Writer`).
+* **Característica:** É **bloqueante (blocking I/O)** — uma thread fica estritamente aguardando a operação de I/O concluir.
+* **Uso:** Ideal para operações simples e arquivos pequenos.
+
+#### 2. Java NIO (Desde o Java 1.4)
+* **Abordagem:** Baseada em Buffers e Canais (`Channels`) em vez de fluxos contínuos.
+
+* **Característica:** Suporta I/O não bloqueante e multiplexação com `Selectors` (excelente para servidores de alta concorrência).
+
+* **Uso:** Extremamente eficiente para leitura e escrita de grandes volumes de dados ou fluxos de rede.
+
+#### 3. Java NIO.2 (Desde o Java 7)
+* **Abordagem:** Focada na produtividade do desenvolvedor, introduzindo a interface `java.nio.file.Path` (substituindo o antigo `File`).
+
+* **Recursos:** Suporte a sistemas de arquivos virtuais (como ZIPs), monitoramento de diretórios em tempo real (`WatchService`), operações atômicas e manipulação robusta de diretórios.
+
+---
+
+### 📊 Benchmark Prático: Leitura de Arquivo de 200 MB
+
+* **O Problema:** Diferentes abordagens geram impactos drásticos de performance e consumo de memória dependendo do tamanho do arquivo.
+
+| Abordagem | Tempo de Execução (200 MB) |
+| :--- | :--- |
+| **Java I/O clássico** (`BufferedReader`) | 687 ms |
+| **Java NIO** (`FileChannel` + `ByteBuffer`) | **192 ms (O mais rápido)** |
+| **Java NIO.2** (`Files.readAllLines`) | 691 ms |
+
+**Gotchas e Trade-offs Arquiteturais:**
+
+* **O perigo do `Files.readAllLines`:** Ele carrega **todo o arquivo de uma só vez para a memória**, o que pode estourar a memória (`OutOfMemoryError`) se aplicado a arquivos massivos. Contudo, para arquivos pequenos, sua sintaxe é a mais prática do mercado.
+
+
+* **O poder do `FileChannel` com Buffer:** O ganho absurdo de performance do NIO se dá porque trabalhamos com canais diretos e blocos de memória definidos por um buffer (ex: alocar `8192` bytes). Quanto melhor dimensionado o buffer, mais blocos lemos de forma otimizada com poucas iterações de sistema.
+
