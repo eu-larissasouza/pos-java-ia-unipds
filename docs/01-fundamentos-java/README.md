@@ -15,6 +15,10 @@
 
 *(Permite criar classes e métodos mais enxutos, como métodos `main` simplificados sem a assinatura padrão verbosa).*
 
+
+---
+
+
 ## 2. Pilares da Orientação a Objetos na Prática
 Laboratório prático: ```/modulo01-fundamentos/pilaresPoo```
 
@@ -33,6 +37,9 @@ Laboratório prático: ```/modulo01-fundamentos/pilaresPoo```
 
 
 * **Polimorfismo:** Depende diretamente da herança e da reescrita de comportamentos (ex: o método `debitar` adaptado em uma conta especial com limite). Permite referenciar tipos de forma genérica enquanto a JVM resolve dinamicamente em tempo de execução qual implementação específica executar com base na instância real.
+
+
+---
 
 
 ## 3. Estruturas de Dados e Collections Framework (List, Set e Map)
@@ -80,6 +87,9 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 
 
 
+---
+
+
 ## 4. APIs Essenciais da Plataforma Java
 
 * **O que resolve:** Aproveitar o ecossistema nativo da linguagem para lidar com nulos de forma segura, manipulação moderna de datas, introspecção de código (Reflection), metadados (Annotations), processamento de texto e criptografia sem depender de bibliotecas externas excessivas.
@@ -115,6 +125,9 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **O que resolve:** Proteção de dados sensíveis diretamente com recursos nativos do Java.
 * **A sacada:** A biblioteca `Cipher` possibilita implementar rotinas de criptografia e descriptografia de campos ou dados confidenciais com alta confiabilidade.
 
+
+
+---
 
 
 ## 5. Manipulação de Arquivos e Entrada/Saída (I/O, NIO e NIO.2)
@@ -160,6 +173,8 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **O poder do `FileChannel` com Buffer:** O ganho absurdo de performance do NIO se dá porque trabalhamos com canais diretos e blocos de memória definidos por um buffer (ex: alocar `8192` bytes). Quanto melhor dimensionado o buffer, mais blocos lemos de forma otimizada com poucas iterações de sistema.
 
 
+---
+
 
 ## 6. Tratamento de Erros e Exceções
 
@@ -182,6 +197,7 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
   * `throw`: Utilizado para instanciar e disparar uma exceção de forma ativa (ideal para criar exceções de negócio customizadas, que podem ser extendidas de `RuntimeException` para maior flexibilidade ou de `Exception` para fluxos validados).
   * `throws`: Declaração na assinatura do método informando quais exceções verificadas ele pode propagar.
 
+---
 
 
 ## 7. Streams API (Java 8)
@@ -204,6 +220,7 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **Foco:** Configuração e padronização da IDE (IntelliJ IDEA / Eclipse), JDKs e variáveis de ambiente para desenvolvimento professional Java.
 
 ---
+
 
 ## 9. Maven para Gestão de Dependências
 
