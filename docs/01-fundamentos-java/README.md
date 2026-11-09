@@ -197,3 +197,29 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 ### B. O Detalhe Crítico: `.toList()` vs. `.collect(Collectors.toList())`
 * **`.toList()` (Java 16+):** Retorna uma lista **imutável** (tamanho fixo, não permite adição ou remoção de elementos após a criação, embora os atributos dos objetos internos possam ser alterados).
 * **`.collect(Collectors.toList())`:** Retorna uma lista **mutável**, permitindo que você adicione ou remova elementos posteriormente se o seu fluxo de negócio exigir.
+
+
+
+## 8. Configuração de Ambiente
+* **Foco:** Configuração e padronização da IDE (IntelliJ IDEA / Eclipse), JDKs e variáveis de ambiente para desenvolvimento professional Java.
+
+---
+
+## 9. Maven para Gestão de Dependências
+
+* **O que resolve:** Automatizar o ciclo de vida da aplicação (build, compilação, testes, empacotamento em JAR/WAR) e resolver centralizadamente o download e a gestão de dependências externas sem necessidade de gerenciamento manual de bibliotecas.
+
+### A. Contexto Histórico e Funcionamento
+
+* **O Problema Pré-2004:** O ecossistema Java possuía uma vasta oferta de bibliotecas de terceiros, mas a inclusão e o controle de versões em projetos eram feitos manualmente (baixando arquivos `.jar` e configurando caminhos de build), o que gerava incompatibilidades e complexidade.
+* **A Solução do Maven:** A comunidade padronizou o gerenciamento criando o **Repositório Central (Maven Central)**. Através de um arquivo declarativo em XML (`pom.xml`), a ferramenta identifica, baixa automaticamente na versão correta e gerencia a árvore de dependências transitivas da aplicação.
+* 🔗 *Referência:* [Maven Central Repository](https://mvnrepository.com/repos/central)
+
+### B. O Arquivo `pom.xml` (Project Object Model)
+
+* **`groupId`:** Identificador da organização ou domínio reverso (ex: `br.com.enterprise`).
+* **`artifactId`:** Nome do projeto ou módulo específico (ex: `projectmaven`).
+* **`version`:** Versão atual do artefato (ex: `1.0.0-SNAPSHOT`).
+* **`dependencies`:** Bloco declarativo onde são listadas as bibliotecas de terceiros (como o Google Gson).
+
+
