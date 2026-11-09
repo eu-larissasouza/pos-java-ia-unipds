@@ -1,3 +1,9 @@
-**/.idea/
-**/out/
+# IDEs
+.idea/
 *.iml
+
+# Compilação e Build
+out/
+target/
+.gradle/
+build/
