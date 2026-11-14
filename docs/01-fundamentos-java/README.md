@@ -240,3 +240,22 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **`dependencies`:** Bloco declarativo onde são listadas as bibliotecas de terceiros (como o Google Gson).
 
 
+
+## 10. Introdução ao Gradle (Gerenciamento Moderno de Build)
+
+* **O que resolve:** Superar a verbosidade do Maven e da estruturação em XML para gerenciar dependências e automatizar fluxos de build complexos utilizando uma abordagem declarativa e programática.
+
+### A. O Problema do XML e a Evolução para o Gradle
+* **A limitação do Maven:** Embora seja o mais popular, o Maven utiliza arquivos `pom.xml`. Como o XML **não é programável**, definir lógicas personalizadas e complexas de build exigia a criação de classes *Mojo* para escrever plugins externos — um processo altamente verboso.
+* **Curiosidade histórica:** O próprio criador do *Ant* (precursor do Maven) comentou que transformar arquivos de configuração em uma quase-linguagem de script baseada em XML pode não ter sido a melhor escolha.
+* **A solução do Gradle:** Uma ferramenta moderna que mantém a simplicidade declarativa na gestão de dependências (reutilizando o próprio repositório central do Maven), mas que é **totalmente programável**, permitindo escrever scripts e criar tasks customizadas utilizando **Groovy** ou **Kotlin**.
+
+### B. O Gradle Wrapper e Comandos Essenciais
+* **Gradle Wrapper (`gradlew`):** Garante a padronização do ambiente ao embutir uma versão específica do Gradle no próprio projeto, evitando conflitos de versão entre diferentes máquinas de desenvolvimento ou servidores de CI/CD.
+
+* **Comandos úteis no dia a dia:**
+  * `./gradlew build`: Compila, executa os testes e empacota a aplicação.
+  * `./gradlew dependencies`: Exibe a árvore completa de dependências do projeto.
+  * `./gradlew dependencies --configuration rC`: Lista e audita as configurações de dependências específicas do projeto.
+
+  
