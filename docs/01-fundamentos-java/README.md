@@ -197,8 +197,8 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
   * `throw`: Utilizado para instanciar e disparar uma exceção de forma ativa (ideal para criar exceções de negócio customizadas, que podem ser extendidas de `RuntimeException` para maior flexibilidade ou de `Exception` para fluxos validados).
   * `throws`: Declaração na assinatura do método informando quais exceções verificadas ele pode propagar.
 
----
 
+---
 
 ## 7. Streams API (Java 8)
 
@@ -215,6 +215,7 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **`.collect(Collectors.toList())`:** Retorna uma lista **mutável**, permitindo que você adicione ou remova elementos posteriormente se o seu fluxo de negócio exigir.
 
 
+---
 
 ## 8. Configuração de Ambiente
 * **Foco:** Configuração e padronização da IDE (IntelliJ IDEA / Eclipse), JDKs e variáveis de ambiente para desenvolvimento professional Java.
@@ -240,6 +241,7 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
 * **`dependencies`:** Bloco declarativo onde são listadas as bibliotecas de terceiros (como o Google Gson).
 
 
+---
 
 ## 10. Introdução ao Gradle (Gerenciamento Moderno de Build)
 
@@ -258,4 +260,207 @@ Laboratório prático: ```/modulo01-fundamentos/estruturasDados```
   * `./gradlew dependencies`: Exibe a árvore completa de dependências do projeto.
   * `./gradlew dependencies --configuration rC`: Lista e audita as configurações de dependências específicas do projeto.
 
+---
+
+## 11, 12 e 13. Aprofundando em Coleções
+
+Laboratório prático: `aula2-aprofundando-em-colecoes`
+
+- **O que resolve:** Entender por baixo do capô as estruturas de dados e escolher a variação certa para cada cenário (ordem, memória, auditoria, ciclo de vida).
+
+
+- **A sacada (O que muda na prática):**
+  - **`ArrayList` x `LinkedList`:** array contíguo (rápido por índice, custoso no meio) x nós encadeados (bom nas pontas, `get(i)` percorre a lista).
+  - **Sets:** `HashSet` (sem ordem), `LinkedHashSet` (ordem de inserção), `TreeSet` (ordenado por árvore rubro-negra), `EnumSet` (vetor de bits, só para Enums).
+  - **Maps:** mesma lógica dos Sets (`HashMap`, `LinkedHashMap`, `TreeMap`) + `EnumMap`, `WeakHashMap` e `IdentityHashMap`.
+  - **No projeto:** a auditoria de preços usa `IdentityHashMap`. Como `ItemCardapio` é `record`, depois de alterar o preço 2.99 → 3.99 → 2.99 temos `==` **false**, mas `equals()` e `hashCode()` **true**. Num `HashMap`, as duas instâncias virariam uma chave só.
+
+
+- **Gotcha / Trade-off arquitetural:**
+  - O `WeakHashMap` só descarta a entrada se **nenhuma outra referência** segurar a chave, inclusive outros mapas. No projeto, o item antigo continua preso como chave na auditoria.
+  - `TreeSet`/`TreeMap` decidem igualdade por `compareTo`/`Comparator`, não por `equals`.
+  - `System.gc()` é só uma sugestão: demos de `WeakHashMap` não são determinísticas.
+
+---
+
+## 14, 15 e 16. Networking
+
+Laboratório prático: `aula3-networking`
+
+- **O que resolve:** Comunicar com outros sistemas pela rede usando só o JDK e entender o que existe por baixo do HTTP.
+
+
+- **A sacada (O que muda na prática):**
+  - **`HttpClient` (Java 11):** cliente HTTP moderno, `AutoCloseable` no Java 21. Substitui `URL`/`HttpURLConnection` (`new URL(String)` está obsoleto; use `URI.create`).
+  - **`HttpServer` (`com.sun.net.httpserver`):** servidor HTTP pronto do JDK.
+  - **`Socket` / `ServerSocket`:** HTTP "na mão". É texto: linha da requisição + cabeçalhos + **linha em branco** + corpo.
+- **Snippet útil (cliente HTTP):**
+
+  ```java
+  try (HttpClient cliente = HttpClient.newHttpClient()) {
+      var request = HttpRequest.newBuilder(URI.create("http://localhost:8000/itensCardapio.json")).build();
+      HttpResponse<String> resposta = cliente.send(request, HttpResponse.BodyHandlers.ofString());
+  }
+  ```
+- **Gotcha / Trade-off arquitetural:**
+  - O servidor com `Socket` lê a requisição com `read()` + `available()`, uma heurística frágil. Servidores reais usam o `Content-Length`.
+  - HTTP exige `\r\n` nas linhas; `println` usa o separador do sistema.
+  - Esse servidor atende **um cliente por vez**: é o problema que a próxima aula resolve.
+
+---
+
+## 17, 18, 19 e 20. Concurrency
+
+Laboratório prático: `aula4-concurrency`
+
+- **O que resolve:** Atender vários clientes ao mesmo tempo sem travar o servidor e proteger dados compartilhados entre threads.
+
+
+- **A sacada (O que muda na prática):** a evolução do servidor de Socket em quatro passos:
+  1. **Sem threads:** um cliente por vez.
+  2. **`new Thread(...)` por conexão:** o `accept()` só aceita e delega.
+  3. **`Executors.newFixedThreadPool(50)`:** reaproveita threads; o excedente espera na fila.
+  4. **`Database` thread-safe:** `HashMap` → `ConcurrentSkipListMap` (concorrente e ordenado por id).
+
+### 📊 Benchmark do repositório (JMeter, `Thread.sleep(250)` simulando I/O)
+
+| Cenário | Amostras | Tempo médio | Throughput |
+| :-- | :-- | :-- | :-- |
+| Sem threads | 333 | 21.242 ms | 3,6 req/s |
+| Uma thread por request | 10.807 | 511 ms | 178,6 req/s |
+| Pool fixo de 50 | 5.729 | 968 ms | 94 req/s |
+
+- **Leitura:** thread por request é a mais rápida aqui, mas **sem limite**; o pool dá um teto previsível trocando um pouco de latência por segurança. As execuções foram feitas em momentos diferentes do código: compare a ordem de grandeza.
+
+
+- **Snippet útil:**
+
+  ```java
+  try (ExecutorService pool = Executors.newFixedThreadPool(5)) { // close() espera as tarefas (Java 19+)
+      pool.execute(() -> atendeCliente());
+  }
+  ```
+- **Gotcha / Trade-off arquitetural:**
+  - Coleção concorrente **não torna a classe thread-safe**: o `IdentityHashMap` da auditoria continua sem proteção.
+  - `get` + `put` continuam não atômicos; use `merge`, `compute` ou `putIfAbsent`.
+  - No `POST` do projeto, o `400 Bad Request` não tem `return` e o código segue para `requestChunks[1]` → `ArrayIndexOutOfBoundsException`.
+
+---
+
+## 21 e 22. JDBC
+
+Laboratório prático: `aula5-jdbc`
+
+- **O que resolve:** Persistir dados em banco relacional e trocar o armazenamento sem reescrever o servidor.
+
+
+- **A sacada (O que muda na prática):**
+  - **Interface `Database`** com duas implementações: `InMemoryDatabase` (o antigo `Map`) e `SQLDatabase` (MySQL). O servidor só conhece a interface.
+  - **Fluxo:** `DriverManager.getConnection(...)` → `PreparedStatement` → `ResultSet`. O `try-with-resources` fecha os três.
+  - **Mapeamento:** `DECIMAL` ↔ `BigDecimal`, `ENUM` ↔ `enum.valueOf(String)`, `NULL` ↔ `null`.
+  - `executeQuery()` para SELECT; `execute()`/`executeUpdate()` para INSERT/UPDATE/DELETE.
+
+
+- **Snippet útil (parâmetro, nunca concatenação):**
+
+  ```java
+  String sql = "SELECT nome, preco FROM item_cardapio WHERE id = ?";
+  try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+       PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setLong(1, id);
+      try (ResultSet rs = ps.executeQuery()) { /* ... */ }
+  }
+  ```
   
+
+- **Gotcha / Trade-off arquitetural:**
+  - O `script.sql` usa `use cardapio;`, mas o `docker-compose.yml` não cria o banco: crie antes (ou adicione `MYSQL_DATABASE`).
+  - Uma conexão nova por chamada é cara; em produção usa-se **pool** (ex.: HikariCP). Usuário e senha no código: use variáveis de ambiente.
+  - O `Main` insere o `id` 10: rodar duas vezes dá chave duplicada.
+  - Três métodos do `SQLDatabase` estão como `UnsupportedOperationException("TODO")`.
+
+---
+
+## 23. Logging
+
+Laboratório prático: `aula6-logs`
+
+- **O que resolve:** Trocar `System.out.println` por registros com nível, destino e formato configuráveis sem mexer no código.
+
+
+- **A sacada (O que muda na prática):**
+  - **`java.util.logging`** já vem no JDK. Um `Logger` por classe: `Logger.getLogger(Classe.class.getName())`.
+  - **Níveis:** `SEVERE` > `WARNING` > `INFO` > `CONFIG` > `FINE` > `FINER` > `FINEST`.
+  - **Handlers** definem o destino (`ConsoleHandler`, `FileHandler`), cada um com seu nível. No projeto: console em `INFO`, arquivo em `FINE`.
+
+
+- **Snippet útil:**
+
+  ```java
+  logger.finer(() -> "Method: " + method);                 // Supplier: só monta a String se FINER estiver ativo
+  logger.log(Level.SEVERE, "Erro fatal no servidor", ex);  // passa a exceção: sai o stack trace
+  ```
+  
+- **Gotcha / Trade-off arquitetural:**
+  - O `logging.properties` em `resources` **não é carregado sozinho**: precisa de `-Djava.util.logging.config.file=...` (ou `LogManager.readConfiguration`).
+  - `logger.fine("x" + y)` concatena mesmo com o nível desligado: use `Supplier`.
+  - O `cardapio.0.log` está commitado no repo; log deve ir no `.gitignore`.
+  - Em projetos reais é comum SLF4J + Logback; o JUL é a base nativa do JDK.
+
+---
+
+## 24. Internacionalização (i18n)
+
+Laboratório prático: `aula7-i18n`
+
+- **O que resolve:** Servir a mesma aplicação em vários idiomas e países: textos, moeda e datas.
+
+
+- **A sacada (O que muda na prática):**
+  - **`Locale`:** idioma + país (`pt_BR`, `en_US`). `Locale.of(...)` vale do Java 19 em diante.
+  - **`ResourceBundle`:** textos em `mensagens_pt_BR.properties`; o arquivo base é `mensagens.properties`.
+  - **`NumberFormat.getCurrencyInstance(locale)`** para moeda e **`DateTimeFormatter...withLocale(locale)`** para datas.
+  - No projeto, `/` serve a página em pt-BR e `/en` em en-US.
+
+| Item | pt-BR | en-US |
+| :-- | :-- | :-- |
+| Moeda (1234,50) | R$ 1.234,50 | $1,234.50 |
+| Mês/ano | novembro/2026 | November/2026 |
+| Categoria | Bebidas | Beverages |
+
+
+- **Gotcha / Trade-off arquitetural:**
+  - **Fallback do `ResourceBundle`:** com a JVM em `pt_BR`, pedir `Locale.US` devolveu "Bebidas", porque o Java tenta o locale padrão antes do arquivo base. Solução simples: criar `mensagens_en.properties`.
+  - `NumberFormat` muda o formato e o símbolo, **não converte câmbio**.
+  - O HTML concatena `item.nome()` sem escapar (risco de XSS), e os textos fixos da página seguem em português.
+
+---
+
+## 25. Serialização
+
+Laboratório prático: `aula8-serialization`
+
+- **O que resolve:** Transformar objetos em bytes (arquivo ou rede) e reconstruí-los depois.
+
+- **A sacada (O que muda na prática):**
+  - A classe implementa **`Serializable`**; `ObjectOutputStream.writeObject` grava e `ObjectInputStream.readObject` lê.
+  - **`serialVersionUID`:** versão do "contrato" dos bytes. Se mudar e não bater com o do arquivo, a leitura falha com `InvalidClassException`.
+  - **`transient`:** o campo fica fora dos bytes (volta `null`).
+  - No projeto, `GET /itens-cardapio` com `Accept: application/x-java-serialized-object` devolve a lista serializada; sem ele, devolve JSON.
+
+- **Snippet útil (leitura com filtro):**
+
+  ```java
+  try (var ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+      ois.setObjectInputFilter(ObjectInputFilter.Config.createFilter("mx.florinda.cardapio.*;java.util.*;java.lang.*;java.math.*;!*"));
+      var lida = ois.readObject();
+  }
+  ```
+  
+- **Gotcha / Trade-off arquitetural:**
+  - **Segurança:** desserializar bytes não confiáveis pode executar código malicioso; use `ObjectInputFilter`. O cliente do projeto faz cast direto, sem filtro.
+  - Formato só de Java, frágil entre versões e grande (1 item gerou 777 bytes, bem mais que o JSON). Para APIs, JSON é o padrão.
+  - Todos os objetos aninhados precisam ser `Serializable`.
+  - No servidor, `header.contains("Accept")` também casa `Accept-Language` e `Accept: */*`.
+
+---
